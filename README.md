@@ -2,7 +2,7 @@
 
 `otto-hzys` 的纯后端 API 包装层。
 
-这个仓库不再提供前端页面，只保留音频生成 API、测试，以及后端包装层。上游源码来源固定为 `submod/`，目标上游仓库是 `https://github.com/hua-zhi-wan/otto-hzys`。
+上游源码来源固定为 `submod/`，目标上游仓库是 `https://github.com/hua-zhi-wan/otto-hzys`。
 
 ## API
 
@@ -56,9 +56,3 @@ git submodule update --init --recursive
 - 启动时会检测 `ffmpeg`
 - 缺失时会在日志中打印明确错误
 - `/api/text-to-wav` 会返回 `ffmpeg unavailable`
-
-## Notes
-
-- 包管理器统一为 `pnpm`
-- 仓库不再包含前端 UI、Vue CLI 配置或浏览器试听能力
-- 根仓不再保留 `public/static` 资源副本
