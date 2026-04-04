@@ -4,6 +4,8 @@
 
 上游源码来源固定为 `submod/`，目标上游仓库是 `https://github.com/hua-zhi-wan/otto-hzys`。
 
+测试 Vercel 后端：https://otto-hzys-api-backend-916h.vercel.app/api/
+
 ## API
 
 ### `POST /api/text-to-wav`
