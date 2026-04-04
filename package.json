@@ -7,8 +7,11 @@
     "test": "node test/backend.test.js"
   },
   "dependencies": {
+    "audio-decode": "^3.6.0",
     "express": "^5.2.1",
     "js-pinyin": "^0.2.7",
+    "mpg123-decoder": "^1.0.3",
+    "node-wav": "^0.0.2",
     "pinyin": "^4.0.0-alpha.0"
   }
 }

@@ -56,3 +56,28 @@ git submodule update --init --recursive
 - 启动时会检测 `ffmpeg`
 - 缺失时会在日志中打印明确错误
 - `/api/text-to-wav` 会返回 `ffmpeg unavailable`
+
+## Vercel Version
+
+仓库额外提供了一套单独的 Vercel 版本：
+
+- 入口是 [`api/text-to-wav.js`](/mnt/data/Project/otto-hzys-api-backend/api/text-to-wav.js)
+- 健康检查是 [`api/health.js`](/mnt/data/Project/otto-hzys-api-backend/api/health.js)
+- 不依赖本地 `submod/public/static`
+- 不依赖系统 `ffmpeg`
+- 改为从 `https://otto-hzys.huazhiwan.top/static` 拉取远程资源
+- `wav` 使用 `node-wav`
+- `mp3` 使用 `mpg123-decoder`
+
+可选环境变量：
+
+```bash
+OTTO_HZYS_ASSET_BASE_URL=https://otto-hzys.huazhiwan.top/static
+```
+
+Vercel 面板可直接使用：
+
+- Framework Preset: `Other`
+- Install Command: `pnpm install`
+- Build Command: 留空
+- Output Directory: 留空
