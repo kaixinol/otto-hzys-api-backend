@@ -1,0 +1,14 @@
+{
+  "name": "otto-hzys-api-backend",
+  "version": "1.0.0",
+  "packageManager": "pnpm@10.17.1",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/backend.test.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "js-pinyin": "^0.2.7",
+    "pinyin": "^4.0.0-alpha.0"
+  }
+}

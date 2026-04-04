@@ -1,0 +1,3 @@
+[submodule "submod"]
+	path = submod
+	url = https://github.com/hua-zhi-wan/otto-hzys
