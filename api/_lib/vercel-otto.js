@@ -1,5 +1,4 @@
 const wav = require('node-wav');
-const { MPEGDecoder } = require('mpg123-decoder');
 const { buildStaticDataContext, textToAudioSequence } = require('../../lib/text-to-audio-sequence');
 
 const REMOTE_STATIC_BASE_URL = (
@@ -147,6 +146,7 @@ async function getAudioBufferForToken(token, useNonDdbPinyin) {
 async function getMp3Decoder() {
   if (!mp3DecoderPromise) {
     mp3DecoderPromise = (async () => {
+      const { MPEGDecoder } = await import('mpg123-decoder');
       const decoder = new MPEGDecoder();
       await decoder.ready;
       return decoder;
