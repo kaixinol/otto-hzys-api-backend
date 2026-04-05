@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>电棍otto语音活字印刷生成</title>
+    <title>电棍otto语音活字印刷生成（后端API版 - DEMO）</title>
     <meta name="description" content="电棍otto语音活字印刷生成，支持文本转 WAV、页内播放器试听、可选密钥认证与字数限制提示。" />
     <meta name="keywords" content="电棍,otto,活字印刷,语音生成,文本转语音,wav" />
     <meta name="robots" content="index,follow" />
@@ -27,6 +27,7 @@
         "name": "电棍otto语音活字印刷生成",
         "url": "https://otto-hzys-api-backend.vercel.app/",
         "description": "电棍otto语音活字印刷生成，支持文本转 WAV、页内播放器试听、可选密钥认证与字数限制提示。",
+        "codeRepository": "https://github.com/kaixinol/otto-hzys-api-backend",
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Web",
         "image": "https://github.com/hua-zhi-wan/otto-hzys/blob/master/src/assets/bk/1.webp?raw=true",
@@ -212,6 +213,10 @@
         color: var(--muted);
       }
 
+      .hint a {
+        color: inherit;
+      }
+
       .status {
         min-height: 24px;
       }
@@ -260,6 +265,10 @@
         <h1>电棍otto语音活字印刷生成</h1>
         <p class="subtitle">
           电棍otto语音活字印刷生成工具。在 Vercel 根路径直接调用后端接口，自动显示当前字数上限，并在填写密钥时附带 Bearer 认证头。
+        </p>
+        <p class="hint">
+          GitHub：
+          <a href="https://github.com/kaixinol/otto-hzys-api-backend" target="_blank" rel="noreferrer">kaixinol/otto-hzys-api-backend</a>
         </p>
       </section>
 
@@ -330,6 +339,7 @@
       const submitButton = document.getElementById('submit-btn');
       const playerPanel = document.getElementById('player-panel');
       const audioPlayer = document.getElementById('audio-player');
+      const searchParams = new URLSearchParams(window.location.search);
 
       let maxTextLength = 1000;
       let authEnabled = false;
@@ -344,33 +354,7 @@
         countText.textContent = `${textInput.value.length}/${maxTextLength}`;
       }
 
-      async function loadRuntimeConfig() {
-        try {
-          const response = await fetch('/health');
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
-
-          const data = await response.json();
-          if (typeof data.maxTextLength === 'number' && data.maxTextLength > 0) {
-            maxTextLength = data.maxTextLength;
-          }
-          authEnabled = Boolean(data.authEnabled);
-          limitText.textContent = `当前上限：${maxTextLength} 个字符`;
-          authText.textContent = authEnabled
-            ? '服务端已启用 Bearer 认证，请填写 API Key。'
-            : '服务端未启用认证，API Key 可留空。';
-          updateCounter();
-        } catch (error) {
-          limitText.textContent = `当前上限：${maxTextLength} 个字符（默认值）`;
-          authText.textContent = '无法读取运行时配置，将按未启用认证的默认状态显示。';
-        }
-      }
-
-      textInput.addEventListener('input', updateCounter);
-
-      form.addEventListener('submit', async (event) => {
-        event.preventDefault();
+      async function submitGeneration() {
         const text = textInput.value;
 
         if (!text.trim()) {
@@ -431,10 +415,47 @@
         } finally {
           submitButton.disabled = false;
         }
+      }
+
+      async function loadRuntimeConfig() {
+        try {
+          const response = await fetch('/health');
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const data = await response.json();
+          if (typeof data.maxTextLength === 'number' && data.maxTextLength > 0) {
+            maxTextLength = data.maxTextLength;
+          }
+          authEnabled = Boolean(data.authEnabled);
+          limitText.textContent = `当前上限：${maxTextLength} 个字符`;
+          authText.textContent = authEnabled
+            ? '服务端已启用 Bearer 认证，请填写 API Key。'
+            : '服务端未启用认证，API Key 可留空。';
+          updateCounter();
+        } catch (error) {
+          limitText.textContent = `当前上限：${maxTextLength} 个字符（默认值）`;
+          authText.textContent = '无法读取运行时配置，将按未启用认证的默认状态显示。';
+        }
+      }
+
+      textInput.addEventListener('input', updateCounter);
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        await submitGeneration();
       });
 
       updateCounter();
-      loadRuntimeConfig();
+      loadRuntimeConfig().finally(async () => {
+        const initialText = searchParams.get('text');
+        if (initialText) {
+          textInput.value = initialText;
+          updateCounter();
+          await submitGeneration();
+        }
+      });
     </script>
   </body>
 </html>
