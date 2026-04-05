@@ -3,7 +3,41 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Otto Hzys</title>
+    <title>电棍otto语音活字印刷生成</title>
+    <meta name="description" content="电棍otto语音活字印刷生成，支持文本转 WAV、页内播放器试听、可选密钥认证与字数限制提示。" />
+    <meta name="keywords" content="电棍,otto,活字印刷,语音生成,文本转语音,wav" />
+    <meta name="robots" content="index,follow" />
+    <meta name="theme-color" content="#b24a2a" />
+    <link rel="canonical" href="https://otto-hzys-api-backend.vercel.app/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="电棍otto语音活字印刷生成" />
+    <meta property="og:url" content="https://otto-hzys-api-backend.vercel.app/" />
+    <meta property="og:description" content="电棍otto语音活字印刷生成，输入文本即可生成并在页面内播放 WAV 音频。" />
+    <meta property="og:image" content="https://github.com/hua-zhi-wan/otto-hzys/blob/master/src/assets/bk/1.webp?raw=true" />
+    <meta property="og:image:alt" content="电棍otto语音活字印刷生成封面图" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="电棍otto语音活字印刷生成" />
+    <meta name="twitter:description" content="输入文本即可生成电棍otto语音活字印刷 WAV，并在页面内直接播放。" />
+    <meta name="twitter:image" content="https://github.com/hua-zhi-wan/otto-hzys/blob/master/src/assets/bk/1.webp?raw=true" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "电棍otto语音活字印刷生成",
+        "url": "https://otto-hzys-api-backend.vercel.app/",
+        "description": "电棍otto语音活字印刷生成，支持文本转 WAV、页内播放器试听、可选密钥认证与字数限制提示。",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Web",
+        "image": "https://github.com/hua-zhi-wan/otto-hzys/blob/master/src/assets/bk/1.webp?raw=true",
+        "inLanguage": "zh-CN",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    </script>
     <style>
       :root {
         color-scheme: light;
@@ -190,6 +224,22 @@
         color: var(--success);
       }
 
+      .player {
+        margin-top: 18px;
+        padding: 14px;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.7);
+      }
+
+      .player[hidden] {
+        display: none;
+      }
+
+      audio {
+        width: 100%;
+      }
+
       @media (max-width: 640px) {
         body {
           padding: 12px;
@@ -207,9 +257,9 @@
     <main class="card">
       <section class="hero">
         <p class="eyebrow">OTTO HZYS</p>
-        <h1>简易文本转 WAV</h1>
+        <h1>电棍otto语音活字印刷生成</h1>
         <p class="subtitle">
-          在 Vercel 根路径直接调用后端接口。页面会读取服务端运行时配置，自动显示当前字数上限，并在填写密钥时附带 Bearer 认证头。
+          电棍otto语音活字印刷生成工具。在 Vercel 根路径直接调用后端接口，自动显示当前字数上限，并在填写密钥时附带 Bearer 认证头。
         </p>
       </section>
 
@@ -235,7 +285,7 @@
           <label class="option" for="useNonDdbPinyin">
             <input id="useNonDdbPinyin" name="useNonDdbPinyin" type="checkbox" checked />
             <span>
-              <strong>使用非 DDB 拼音</strong>
+              <strong>使用非电棍拼音</strong>
               <span>允许从额外子目录随机取样。</span>
             </span>
           </label>
@@ -251,18 +301,21 @@
 
         <div class="field">
           <label for="apiKey">API Key</label>
-          <input id="apiKey" name="apiKey" type="password" placeholder="未启用认证时可留空" />
+          <input id="apiKey" name="apiKey" type="password" autocomplete="new-password" placeholder="未启用认证时可留空" />
           <div class="meta">
             <span id="auth-text">认证状态读取中...</span>
           </div>
         </div>
 
         <div class="actions">
-          <button id="submit-btn" type="submit">生成并下载 WAV</button>
+          <button id="submit-btn" type="submit">生成播放器音频</button>
           <span class="hint">接口：`POST /api/text-to-wav`</span>
         </div>
 
         <p id="status" class="status" aria-live="polite"></p>
+        <div id="player-panel" class="player" hidden>
+          <audio id="audio-player" controls preload="metadata"></audio>
+        </div>
       </form>
     </main>
 
@@ -275,9 +328,12 @@
       const authText = document.getElementById('auth-text');
       const statusText = document.getElementById('status');
       const submitButton = document.getElementById('submit-btn');
+      const playerPanel = document.getElementById('player-panel');
+      const audioPlayer = document.getElementById('audio-player');
 
       let maxTextLength = 1000;
       let authEnabled = false;
+      let audioObjectUrl = null;
 
       function setStatus(message, type) {
         statusText.textContent = message;
@@ -362,15 +418,14 @@
           }
 
           const blob = await response.blob();
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `otto-${Date.now()}.wav`;
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-          URL.revokeObjectURL(url);
-          setStatus('生成成功，已开始下载 WAV 文件。', 'success');
+          if (audioObjectUrl) {
+            URL.revokeObjectURL(audioObjectUrl);
+          }
+          audioObjectUrl = URL.createObjectURL(blob);
+          audioPlayer.src = audioObjectUrl;
+          playerPanel.hidden = false;
+          await audioPlayer.play().catch(() => {});
+          setStatus('生成成功，可以直接在页面里播放。', 'success');
         } catch (error) {
           setStatus(error.message || '生成失败，请稍后再试。', 'error');
         } finally {

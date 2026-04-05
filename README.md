@@ -2,9 +2,9 @@
 
 `otto-hzys` 的纯后端 API 包装层。
 
-上游源码来源固定为 `submod/`，目标上游仓库是 `https://github.com/hua-zhi-wan/otto-hzys`。
+上游源码来源固定为 `submod/`，目标上游仓库是  https://github.com/hua-zhi-wan/otto-hzys 。
 
-测试 Vercel 后端：https://otto-hzys-api-backend.vercel.app/api/
+测试 Vercel 页面：https://otto-hzys-api-backend.vercel.app/
 
 ## API
 
@@ -32,6 +32,12 @@ Authorization: Bearer <your-key>
 ### `GET /health`
 
 健康检查。
+
+返回当前运行时信息，包括：
+
+- `authEnabled`
+- `maxTextLength`
+- `assetBaseUrl`（Vercel 版本）
 
 ## Setup
 
@@ -71,6 +77,7 @@ git submodule update --init --recursive
 
 - 入口是 [`api/text-to-wav.js`](/mnt/data/Project/otto-hzys-api-backend/api/text-to-wav.js)
 - 健康检查是 [`api/health.js`](/mnt/data/Project/otto-hzys-api-backend/api/health.js)
+- 根路径前端是 [`index.html`](/mnt/data/Project/otto-hzys-api-backend/index.html)
 - 不依赖本地 `submod/public/static`
 - 不依赖系统 `ffmpeg`
 - 改为从 `https://otto-hzys.huazhiwan.top/static` 拉取远程资源
@@ -87,14 +94,17 @@ OTTO_HZYS_MAX_TEXT_LENGTH=1000
 
 说明：
 
+- 未配置 `OTTO_HZYS_ASSET_BASE_URL` 时，会默认使用 `https://otto-hzys.huazhiwan.top/static`
+- 如果默认资源地址或自定义资源地址不可访问，`/health` 会返回 `503`，音频生成也会失败
 - 未配置 `OTTO_HZYS_API_KEY` 时，不启用认证
 - 配置 `OTTO_HZYS_API_KEY` 后，`POST /api/text-to-wav` 必须携带 `Authorization: Bearer <key>`
 - `OTTO_HZYS_MAX_TEXT_LENGTH` 控制文本最大长度，默认 `1000`
-- Vercel 根路径 `/` 现在提供一个简易前端，可直接输入文本、勾选参数并下载 `wav`
+- Vercel 根路径 `/` 现在提供一个简易前端，可直接输入文本、勾选参数并在页面内播放生成的 `wav`
+- 前端选项中的 `useNonDdbPinyin` 对应展示文案为“使用非电棍拼音”
 
 Vercel 面板可直接使用：
 
 - Framework Preset: `Other`
 - Install Command: `pnpm install`
 - Build Command: 留空
-- Output Directory: 留空
+- Output Directory: `.`
