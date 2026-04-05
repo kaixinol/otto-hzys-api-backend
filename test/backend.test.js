@@ -8,6 +8,8 @@ const TEST_CONFIG = {
   maxConcurrentRequests: process.env.MAX_CONCURRENT || 50,
   totalRequests: process.env.TOTAL_REQUESTS || 100,
   timeout: process.env.TIMEOUT || 30000,
+  apiKey: process.env.TEST_API_KEY || '',
+  maxTextLength: Number.parseInt(process.env.TEST_MAX_TEXT_LENGTH || process.env.OTTO_HZYS_MAX_TEXT_LENGTH || '1000', 10),
   // Valid test texts (non-empty, within length limits)
   validTestTexts: [
     'hello world',
@@ -71,6 +73,10 @@ async function makeRequest(text, params = {}) {
     },
     timeout: TEST_CONFIG.timeout
   };
+
+  if (TEST_CONFIG.apiKey) {
+    options.headers.Authorization = `Bearer ${TEST_CONFIG.apiKey}`;
+  }
 
   // Parse URL
   const url = new URL(TEST_CONFIG.baseUrl + '/api/text-to-wav');
@@ -239,7 +245,7 @@ async function testEdgeCases() {
 
   const edgeCases = [
     { text: '', description: 'Empty string' },
-    { text: 'a'.repeat(1001), description: 'Text too long (1001 chars)' },
+    { text: 'a'.repeat(TEST_CONFIG.maxTextLength + 1), description: `Text too long (${TEST_CONFIG.maxTextLength + 1} chars)` },
     { text: 'valid text', description: 'Valid text', params: { invalidParam: 'test' } },
     { text: null, description: 'Null text' },
     { text: 123, description: 'Number instead of string' }
@@ -259,7 +265,7 @@ async function testEdgeCases() {
           console.log(`   ❌ ${testCase.description}: Should have been rejected but got ${result.statusCode}`);
           allPassed = false;
         }
-      } else if (testCase.text.length > 1000) {
+      } else if (testCase.text.length > TEST_CONFIG.maxTextLength) {
         // Text too long should be rejected
         if (result.statusCode === 400) {
           console.log(`   ✅ ${testCase.description}: Correctly rejected (too long)`);
@@ -279,7 +285,7 @@ async function testEdgeCases() {
     } catch (error) {
       console.log(`   ⚠️  ${testCase.description}: Threw error - ${error.message}`);
       // For invalid inputs, throwing might be acceptable
-      if (typeof testCase.text === 'string' && testCase.text.length <= 1000 && testCase.text.length > 0) {
+      if (typeof testCase.text === 'string' && testCase.text.length <= TEST_CONFIG.maxTextLength && testCase.text.length > 0) {
         allPassed = false;
       }
     }

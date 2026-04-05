@@ -1,4 +1,6 @@
 const { generateTextToWav, REMOTE_STATIC_BASE_URL } = require('./_lib/vercel-otto');
+const { getRuntimeConfig } = require('../lib/runtime-config');
+const { validateApiKeyHeader } = require('../lib/api-security');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -7,6 +9,11 @@ module.exports = async (req, res) => {
   }
 
   try {
+    const authResult = validateApiKeyHeader(req.headers.authorization);
+    if (!authResult.ok) {
+      return res.status(authResult.statusCode).json(authResult.body);
+    }
+
     const {
       text,
       isYsdd = true,
@@ -18,8 +25,9 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Invalid text parameter' });
     }
 
-    if (text.length > 1000) {
-      return res.status(400).json({ error: 'Text too long (max 1000 characters)' });
+    const { maxTextLength } = getRuntimeConfig();
+    if (text.length > maxTextLength) {
+      return res.status(400).json({ error: `Text too long (max ${maxTextLength} characters)` });
     }
 
     const { buffer } = await generateTextToWav({

@@ -3,6 +3,8 @@ const path = require('path');
 const fs = require('fs').promises;
 const { spawn } = require('child_process');
 const { buildStaticDataContext, textToAudioSequence } = require('./lib/text-to-audio-sequence');
+const { getRuntimeConfig } = require('./lib/runtime-config');
+const { validateApiKeyHeader } = require('./lib/api-security');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -224,6 +226,11 @@ async function concatAudioFilesToWav(filePaths) {
 // Main text-to-wav endpoint
 app.post('/api/text-to-wav', async (req, res) => {
   try {
+    const authResult = validateApiKeyHeader(req.headers.authorization);
+    if (!authResult.ok) {
+      return res.status(authResult.statusCode).json(authResult.body);
+    }
+
     const { 
       text, 
       isYsdd = true, 
@@ -235,8 +242,9 @@ app.post('/api/text-to-wav', async (req, res) => {
       return res.status(400).json({ error: 'Invalid text parameter' });
     }
 
-    if (text.length > 1000) {
-      return res.status(400).json({ error: 'Text too long (max 1000 characters)' });
+    const { maxTextLength } = getRuntimeConfig();
+    if (text.length > maxTextLength) {
+      return res.status(400).json({ error: `Text too long (max ${maxTextLength} characters)` });
     }
 
     if (!ffmpegAvailable) {
@@ -290,7 +298,13 @@ app.post('/api/text-to-wav', async (req, res) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Backend server is running' });
+  const { authEnabled, maxTextLength } = getRuntimeConfig();
+  res.json({
+    status: 'ok',
+    message: 'Backend server is running',
+    authEnabled,
+    maxTextLength
+  });
 });
 
 // Catch-all route for non-API requests - return JSON error instead of HTML

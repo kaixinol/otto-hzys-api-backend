@@ -23,6 +23,12 @@
 }
 ```
 
+当配置了 `OTTO_HZYS_API_KEY` 后，请求还需要带上：
+
+```http
+Authorization: Bearer <your-key>
+```
+
 ### `GET /health`
 
 健康检查。
@@ -75,7 +81,16 @@ git submodule update --init --recursive
 
 ```bash
 OTTO_HZYS_ASSET_BASE_URL=https://otto-hzys.huazhiwan.top/static
+OTTO_HZYS_API_KEY=your-secret-key
+OTTO_HZYS_MAX_TEXT_LENGTH=1000
 ```
+
+说明：
+
+- 未配置 `OTTO_HZYS_API_KEY` 时，不启用认证
+- 配置 `OTTO_HZYS_API_KEY` 后，`POST /api/text-to-wav` 必须携带 `Authorization: Bearer <key>`
+- `OTTO_HZYS_MAX_TEXT_LENGTH` 控制文本最大长度，默认 `1000`
+- Vercel 根路径 `/` 现在提供一个简易前端，可直接输入文本、勾选参数并下载 `wav`
 
 Vercel 面板可直接使用：
 
