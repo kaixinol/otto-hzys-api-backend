@@ -42,11 +42,15 @@ Authorization: Bearer <your-key>
 
 ## Setup
 
+### 本地开发
+
 ```bash
 git submodule update --init --recursive
-pnpm install
+pnpm run install:local   # 跳过可选的 JS 音频解码库（本地只用 ffmpeg）
 pnpm start
 ```
+
+`install:local` 等同 `pnpm install --no-optional`，不会安装 `node-wav` 和 `mpg123-decoder`（这两个仅供远程模式使用，本地用 ffmpeg 替代）。
 
 默认使用本地 `submod/public/static` 资源，需要初始化 submodule。
 

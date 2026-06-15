@@ -1,17 +1,19 @@
 {
   "name": "otto-hzys-api-backend",
-  "version": "1.0.0",
-  "packageManager": "pnpm@10.17.1",
+  "version": "1.1.0",
+  "packageManager": "pnpm@11.6.0",
   "scripts": {
     "start": "node server.js",
-    "test": "node test/backend.test.js"
+    "test": "node test/backend.test.js",
+    "install:local": "pnpm install --no-optional"
   },
   "dependencies": {
-    "audio-decode": "^3.10.2",
     "express": "^5.2.1",
     "js-pinyin": "^0.2.7",
-    "mpg123-decoder": "^1.0.3",
-    "node-wav": "^0.0.2",
     "pinyin": "^4.0.0"
+  },
+  "optionalDependencies": {
+    "mpg123-decoder": "^1.0.3",
+    "node-wav": "^0.0.2"
   }
 }
