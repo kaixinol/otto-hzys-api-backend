@@ -1,4 +1,4 @@
-const { generateTextToWav, REMOTE_STATIC_BASE_URL } = require('./_lib/vercel-otto');
+const { generateTextToWav, USE_REMOTE_MODE } = require('./_lib/vercel-otto');
 const { getRuntimeConfig } = require('../lib/runtime-config');
 const { validateApiKeyHeader } = require('../lib/api-security');
 
@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: `Text too long (max ${maxTextLength} characters)` });
     }
 
-    const { buffer } = await generateTextToWav({
+    const { buffer, remoteStaticBaseUrl } = await generateTextToWav(req, {
       text,
       isYsdd,
       useNonDdbPinyin,
@@ -39,7 +39,7 @@ module.exports = async (req, res) => {
 
     res.setHeader('Content-Type', 'audio/wav');
     res.setHeader('Content-Disposition', `attachment; filename="otto-${Date.now()}.wav"`);
-    res.setHeader('X-Otto-Asset-Base', REMOTE_STATIC_BASE_URL);
+    res.setHeader('X-Otto-Asset-Base', remoteStaticBaseUrl);
     return res.status(200).send(buffer);
   } catch (error) {
     const statusCode = error.statusCode || 500;
