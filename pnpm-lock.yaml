@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       audio-decode:
-        specifier: ^3.6.0
-        version: 3.6.0
+        specifier: ^3.10.2
+        version: 3.10.2
       express:
         specifier: ^5.2.1
         version: 5.2.1
@@ -24,47 +24,67 @@ importers:
         specifier: ^0.0.2
         version: 0.0.2
       pinyin:
-        specifier: ^4.0.0-alpha.0
+        specifier: ^4.0.0
         version: 4.0.0
 
 packages:
 
-  '@audio/decode-aac@1.0.2':
-    resolution: {integrity: sha512-cYBLa80ay10H8UkqW4mOsxs9b4DIvDjBMWP++copvZKUxlt+MQEswp7DJ6dqKGjUcUya5HLWeK1Mo3qLMhwndA==}
+  '@audio/decode-aac@1.1.3':
+    resolution: {integrity: sha512-emyA+pFa+o9N728t5HpcInT6FZZtaFtl68ex7UW7iBOTv6DrN4jxASj1D9KQO0S86cpu6t2u9hW9X/99Srfjog==}
     engines: {node: '>=16'}
 
-  '@audio/decode-aiff@1.0.0':
-    resolution: {integrity: sha512-86ZtojEIQooDV6+poQCMTZuUuvToIfA5/hUJudeOkTe19rQV6e5BxT5EanXpWG1S+Q0ARdOhmvfsiidNnO3Jvg==}
+  '@audio/decode-aiff@1.1.2':
+    resolution: {integrity: sha512-v1zfwv5qZc7qaShZmAwCMdiguXULbxKhwTlLTH3sxbWWtOMD3paqTFk7DtGcLR/YwRtE7TJPNMLET8ry5uV61g==}
     engines: {node: '>=16'}
 
-  '@audio/decode-amr@1.0.0':
-    resolution: {integrity: sha512-3B2UTlYS4jN5ZkR8AhKTZ8JjQu6F+01gvaRi54R5ZPVY4L5uwh2/EkUlME/oAd29Up8z9WiGwFuiSdbVJIi0Yg==}
+  '@audio/decode-amr@1.1.1':
+    resolution: {integrity: sha512-iIiY4YHaJ30isZVejhB/taO/jy7NVIveK/j6xPITqz/M/5JXC1tK5PMZ5PJ+Kni0LKGB+QN2BBonefKNkKr/VA==}
     engines: {node: '>=16'}
 
-  '@audio/decode-caf@1.0.0':
-    resolution: {integrity: sha512-eYM6lbY90NPGxd74py4ymuYcwCl7yWno0QyGQA+lcczFyuEahVx2QFNM6fjneNzM/yIibj4v8XwDGakWkcZMsA==}
+  '@audio/decode-caf@1.1.1':
+    resolution: {integrity: sha512-svwj9ZJ9k89T0O4t7Ca5G6AeCusJQOQo4gdJsDlCHw01E4XJm4ok3Oqu2vorgT7BoS1l1Sm2Ef4ib3cr1M9Gbw==}
     engines: {node: '>=16'}
 
-  '@audio/decode-wav@1.0.0':
-    resolution: {integrity: sha512-vyiFrnw1iUj6aL0M9VZ5oJXukhup3AQKV8Do9lbvxo+/o0fGpIW1sVivqJXpNX9VeEjKim6Ca+D23eh+VB9bGQ==}
-
-  '@audio/decode-webm@1.0.0':
-    resolution: {integrity: sha512-RidcjAmj2Sq+Kudaysy1areldRK7GRlhvJB1rRecQvuvNkqP/azMu3cAez880Im1UlHXyMoXnIyY38CjKipjFw==}
+  '@audio/decode-flac@1.1.0':
+    resolution: {integrity: sha512-d47Cxf91m1A7G0ketvWDmnn+qI9UaqEuZF0JpdVgGjjnfZQZ/3C8U3MM6nSsRaz4JZ904HtMkLUMF0yNEHXbJQ==}
     engines: {node: '>=16'}
 
-  '@audio/decode-wma@1.0.0':
-    resolution: {integrity: sha512-lWFo+83xu6SmDUIVTUazgWFVIi72L1SlLXRu/pgYoVaGmF6nEs6fG87sspi3RSr41i+69wikZeKIKh5UALRp/Q==}
+  '@audio/decode-mp3@1.1.0':
+    resolution: {integrity: sha512-eOBqdICwjQ0P9z6ei0wXmXVTW/tIiQ4YGsG3QMFJsdrGORhNQh6paQz53utIcVndmri9xfQStqerxMGt+82ygQ==}
+    engines: {node: '>=16'}
+
+  '@audio/decode-opus@1.0.0':
+    resolution: {integrity: sha512-IwoBu72t09g/T5QKiOSJ1bPBE0fGQkhGh0LwVFH7Uj1xgZ18hVywoA9dCIWxlpnPqz/ZFnAdY7qaKbeEPfGJ+g==}
+    engines: {node: '>=16'}
+
+  '@audio/decode-qoa@1.0.0':
+    resolution: {integrity: sha512-4O57YMprL+AZtxPVOgyDhUr2C+bVcp2cHrMKzBc4zo1ZJgITLZtfVA8TklTJEiLbvVfG2F0j44xHOTqCFhqvbA==}
+    engines: {node: '>=16'}
+
+  '@audio/decode-vorbis@1.0.0':
+    resolution: {integrity: sha512-8TR9V0GQuExgUMHOSYmBE/OreJ9D7YQH78ntPhCxxWM0IeV3qTE3To+cxZVSRg8bMXl6rB7GEGWMmJ8uLbkZlg==}
+    engines: {node: '>=16'}
+
+  '@audio/decode-wav@1.2.0':
+    resolution: {integrity: sha512-Q6VicCGHeoqCiLnTDAaZI3kHCZGd24km/BVLZMBF2vOSbknwnqUEkWs4RRtKUfMX+KBtwAgihkzF0Aw4Y3DkBw==}
+
+  '@audio/decode-webm@1.2.1':
+    resolution: {integrity: sha512-UnlDUaPI7PF+I9neTF5LJ7NNrFgvi0zj8PsPcvkSf+NWW08UnbxgsN9WgtpY731R8MPMM10cZKGEoN0kqxT15Q==}
+    engines: {node: '>=16'}
+
+  '@audio/decode-wma@1.1.2':
+    resolution: {integrity: sha512-zjmvnuhjSx6i8C8xPLxoNwfLxBvTeo2zf8L0Z8LM1H3HlwyWZEEfAlIppNf794f/mhsnbRAnwCpwQ1HklMIJrg==}
     engines: {node: '>=16'}
 
   '@eshaz/web-worker@1.2.2':
     resolution: {integrity: sha512-WxXiHFmD9u/owrzempiDlBB1ZYqiLnm9s6aPc8AlFQalq2tKmqdmMr9GXOupDgzXtqnBipj8Un0gkIm7Sjf8mw==}
 
-  '@thi.ng/bitstream@2.4.45':
-    resolution: {integrity: sha512-LKOEJmmEvgUy1LKn79Hpc+EBMekGs5UOTqH3gcftl99w7fpzUAWg4gFmav34f/zw0SbjbnzO8EDmGUyyZW7dcA==}
+  '@thi.ng/bitstream@2.4.53':
+    resolution: {integrity: sha512-nhSs378SbSVrHNGb2mRDMVeHn+j2Ss78lK4+G/8IYAVBh461sBcSpj80FkBhDyTAr/yAa53ZFlyrKjkj7Volvw==}
     engines: {node: '>=18'}
 
-  '@thi.ng/errors@2.6.7':
-    resolution: {integrity: sha512-jFvECE7RPtB8P3BPL+XYOgGZqRheVtq32DAy3LJwbqgFP2v/lSyTwzvA47KsDKn1VDOGPGBhR5cM8eR7mnNbdQ==}
+  '@thi.ng/errors@2.6.15':
+    resolution: {integrity: sha512-kkd42XRB+D1PVI9IRyEVK/URF0fgTE7SscoehHyuuZ6UHn/4N60ODiTwOONJHRHxLQVQLJ7EwM0t6AuxBufRUA==}
     engines: {node: '>=18'}
 
   '@wasm-audio-decoders/common@9.0.7':
@@ -83,11 +103,11 @@ packages:
     resolution: {integrity: sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng==}
     engines: {node: '>= 0.6'}
 
-  audio-decode@3.6.0:
-    resolution: {integrity: sha512-+2CLgoDcLZDpnktZwENWVNte6JQyxGVcJ66PkffZmE2S7Vs0vtE/Ga8JjgLvHCK/Ebl8fFDOhVe/3cCbTNzxsg==}
+  audio-decode@3.10.2:
+    resolution: {integrity: sha512-F5nYZPpWn9n293E4cP54x/43h1Y0NK4nAefX26+DHUqza1jJhf5dC5VGxVYBiPj9nJcvRAmIrU1/kHkLgIaP6g==}
 
-  audio-type@2.4.0:
-    resolution: {integrity: sha512-ugYMgxLpH6gyWUhFWFl2HCJboFL5z/GoqSdonx8ZycfNP8JDHBhRNzYWzrCRa/6htOWfvJAq7qpRloxvx06sRA==}
+  audio-type@2.4.1:
+    resolution: {integrity: sha512-dK9Z/P83C/rBfTrXXgPD3jZ+aXxx2o/P4rq8+H1JqxbXklitEeJw4CrcwMC5CkON3CX3yy2gaWnIEVYejYh0zQ==}
     engines: {node: '>=14'}
 
   body-parser@2.2.2:
@@ -113,13 +133,17 @@ packages:
     resolution: {integrity: sha512-71Rod2AhcH3JhkBikVpNd0pA+fWsmAaVoti6OR38T76chA7vE3pSerS0Jor4wDw+tOueD2zLVvFOw5H0Rcj7rA==}
     engines: {node: '>= 0.6.x'}
 
-  content-disposition@1.0.1:
-    resolution: {integrity: sha512-oIXISMynqSqm241k6kcQ5UwttDILMK4BiurCfGEREw6+X9jkkpEe5T9FZaApyLGGOnFuyMWZpdolTXMtvEJ08Q==}
+  content-disposition@1.1.0:
+    resolution: {integrity: sha512-5jRCH9Z/+DRP7rkvY83B+yGIGX96OYdJmzngqnw2SBSxqCFPd0w2km3s5iawpGX8krnwSGmF0FW5Nhr0Hfai3g==}
     engines: {node: '>=18'}
 
   content-type@1.0.5:
     resolution: {integrity: sha512-nTjqfcBFEipKdXCv4YDQWCfmcLZKm81ldF0pAopTvyrFGVbcR6P/VAAd5G7N+0tTr8QqiU0tFadD6FK4NtJwOA==}
     engines: {node: '>= 0.6'}
+
+  content-type@2.0.0:
+    resolution: {integrity: sha512-j/O/d7GcZCyNl7/hwZAb606rzqkyvaDctLmckbxLzHvFBzTJHuGEdodATcP3yIRoDrLHkIATJuvzbFlp/ki2cQ==}
+    engines: {node: '>=18'}
 
   cookie-signature@1.2.2:
     resolution: {integrity: sha512-D76uU73ulSXrD1UXF4KE2TMxVVwhsnCgfAyTg9k8P6KGZjlXKrOLe4dJQKI3Bxi5wjesZoFXJWElNWBjPZMbhg==}
@@ -161,8 +185,8 @@ packages:
     resolution: {integrity: sha512-Zf5H2Kxt2xjTvbJvP2ZWLEICxA6j+hAmMzIlypy4xcBg1vKVnx89Wy0GbS+kf5cwCVFFzdCFh2XSCFNULS6csw==}
     engines: {node: '>= 0.4'}
 
-  es-object-atoms@1.1.1:
-    resolution: {integrity: sha512-FGgH2h8zKNim9ljj7dankFPcICIK9Cp5bm+c2gQSYePhpaG5+esrLODihIorn+Pe6FGJzWhXQotPv73jTaldXA==}
+  es-object-atoms@1.1.2:
+    resolution: {integrity: sha512-HWcBoN6NileqtSydK2FqHbS/LoDd2pqrnQHLyJzBj4kOp/ky2MWMN694xOfkK8/SnUsW2DH7EfyVlydKCsm1Zw==}
     engines: {node: '>= 0.4'}
 
   escape-html@1.0.3:
@@ -207,8 +231,8 @@ packages:
     resolution: {integrity: sha512-1cDNdwJ2Jaohmb3sg4OmKaMBwuC48sYni5HUw2DvsC8LjGTLK9h+eb1X6RyuOHe4hT0ULCW68iomhjUoKUqlPQ==}
     engines: {node: '>= 0.4'}
 
-  hasown@2.0.2:
-    resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
+  hasown@2.0.4:
+    resolution: {integrity: sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A==}
     engines: {node: '>= 0.4'}
 
   http-errors@2.0.1:
@@ -316,8 +340,8 @@ packages:
   qoa-format@1.0.1:
     resolution: {integrity: sha512-dMB0Z6XQjdpz/Cw4Rf6RiBpQvUSPCfYlQMWvmuWlWkAT7nDQD29cVZ1SwDUB6DYJSitHENwbt90lqfI+7bvMcw==}
 
-  qs@6.15.0:
-    resolution: {integrity: sha512-mAZTtNCeetKMH+pSjrb76NAM8V9a05I9aBZOHztWy/UqcJdQYNsf59vrRKWnojAT9Y+GbIvoTBC++CPHqpDBhQ==}
+  qs@6.15.2:
+    resolution: {integrity: sha512-Rzq0KEyX/w/tEybncDgdkZrJgVUsUMk3xjh3t5bv3S1HTAtg+uOYt72+ZfwiQwKdysThkTBdL/rTi6HDmX9Ddw==}
     engines: {node: '>=0.6'}
 
   range-parser@1.2.1:
@@ -346,8 +370,8 @@ packages:
   setprototypeof@1.2.0:
     resolution: {integrity: sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==}
 
-  side-channel-list@1.0.0:
-    resolution: {integrity: sha512-FCLHtRD/gnpCiCHEiJLOwdmFP+wzCmDEkc9y7NsYxeF4u7Btsn1ZuwgwJGxImImHicJArLP4R0yX4c2KCrMrTA==}
+  side-channel-list@1.0.1:
+    resolution: {integrity: sha512-mjn/0bi/oUURjc5Xl7IaWi/OJJJumuoJFQJfDDyO46+hBWsfaVM65TBHq2eoZBhzl9EchxOijpkbRC8SVBQU0w==}
     engines: {node: '>= 0.4'}
 
   side-channel-map@1.0.1:
@@ -358,8 +382,8 @@ packages:
     resolution: {integrity: sha512-WPS/HvHQTYnHisLo9McqBHOJk2FkHO/tlpvldyrnem4aeQp4hai3gythswg6p01oSoTl58rcpiFAjF2br2Ak2A==}
     engines: {node: '>= 0.4'}
 
-  side-channel@1.1.0:
-    resolution: {integrity: sha512-ZX99e6tRweoUXqR+VBrslhda51Nh5MTQwou5tnUDgbtyM0dBgmhEDtWGP/xbKn6hqfPRHujUNwz5fy/wbbhnpw==}
+  side-channel@1.1.1:
+    resolution: {integrity: sha512-6x6dK6zJdpTzF4sQeNYxwtvBzf6Eg4GtlesS94HOvTudUeyK2WXAaIfmDgsyslYrRBeFIlsi54AYsFGUuhmvrQ==}
     engines: {node: '>= 0.4'}
 
   simple-yenc@1.0.4:
@@ -373,9 +397,9 @@ packages:
     resolution: {integrity: sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==}
     engines: {node: '>=0.6'}
 
-  type-is@2.0.1:
-    resolution: {integrity: sha512-OZs6gsjF4vMp32qrCbiVSkrFmXtG/AZhY3t0iAMrMBiAZyV9oALtXO8hsrHbMXF9x6L3grlFuwW2oAz7cav+Gw==}
-    engines: {node: '>= 0.6'}
+  type-is@2.1.0:
+    resolution: {integrity: sha512-faYHw0anBbc/kWF3zFTEnxSFOAGUX9GFbOBthvDdLsIlEoWOFOtS0zgCiQYwIskL9iGXZL3kAXD8OoZ4GmMATA==}
+    engines: {node: '>= 18'}
 
   unpipe@1.0.0:
     resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}
@@ -390,30 +414,50 @@ packages:
 
 snapshots:
 
-  '@audio/decode-aac@1.0.2': {}
+  '@audio/decode-aac@1.1.3': {}
 
-  '@audio/decode-aiff@1.0.0': {}
+  '@audio/decode-aiff@1.1.2': {}
 
-  '@audio/decode-amr@1.0.0': {}
+  '@audio/decode-amr@1.1.1': {}
 
-  '@audio/decode-caf@1.0.0': {}
+  '@audio/decode-caf@1.1.1': {}
 
-  '@audio/decode-wav@1.0.0': {}
+  '@audio/decode-flac@1.1.0':
+    dependencies:
+      '@wasm-audio-decoders/flac': 0.2.10
 
-  '@audio/decode-webm@1.0.0':
+  '@audio/decode-mp3@1.1.0':
+    dependencies:
+      mpg123-decoder: 1.0.3
+
+  '@audio/decode-opus@1.0.0':
+    dependencies:
+      ogg-opus-decoder: 1.7.3
+
+  '@audio/decode-qoa@1.0.0':
+    dependencies:
+      qoa-format: 1.0.1
+
+  '@audio/decode-vorbis@1.0.0':
+    dependencies:
+      '@wasm-audio-decoders/ogg-vorbis': 0.1.20
+
+  '@audio/decode-wav@1.2.0': {}
+
+  '@audio/decode-webm@1.2.1':
     dependencies:
       '@wasm-audio-decoders/ogg-vorbis': 0.1.20
       opus-decoder: 0.7.11
 
-  '@audio/decode-wma@1.0.0': {}
+  '@audio/decode-wma@1.1.2': {}
 
   '@eshaz/web-worker@1.2.2': {}
 
-  '@thi.ng/bitstream@2.4.45':
+  '@thi.ng/bitstream@2.4.53':
     dependencies:
-      '@thi.ng/errors': 2.6.7
+      '@thi.ng/errors': 2.6.15
 
-  '@thi.ng/errors@2.6.7': {}
+  '@thi.ng/errors@2.6.15': {}
 
   '@wasm-audio-decoders/common@9.0.7':
     dependencies:
@@ -439,23 +483,23 @@ snapshots:
       mime-types: 3.0.2
       negotiator: 1.0.0
 
-  audio-decode@3.6.0:
+  audio-decode@3.10.2:
     dependencies:
-      '@audio/decode-aac': 1.0.2
-      '@audio/decode-aiff': 1.0.0
-      '@audio/decode-amr': 1.0.0
-      '@audio/decode-caf': 1.0.0
-      '@audio/decode-wav': 1.0.0
-      '@audio/decode-webm': 1.0.0
-      '@audio/decode-wma': 1.0.0
-      '@wasm-audio-decoders/flac': 0.2.10
-      '@wasm-audio-decoders/ogg-vorbis': 0.1.20
-      audio-type: 2.4.0
-      mpg123-decoder: 1.0.3
-      ogg-opus-decoder: 1.7.3
-      qoa-format: 1.0.1
+      '@audio/decode-aac': 1.1.3
+      '@audio/decode-aiff': 1.1.2
+      '@audio/decode-amr': 1.1.1
+      '@audio/decode-caf': 1.1.1
+      '@audio/decode-flac': 1.1.0
+      '@audio/decode-mp3': 1.1.0
+      '@audio/decode-opus': 1.0.0
+      '@audio/decode-qoa': 1.0.0
+      '@audio/decode-vorbis': 1.0.0
+      '@audio/decode-wav': 1.2.0
+      '@audio/decode-webm': 1.2.1
+      '@audio/decode-wma': 1.1.2
+      audio-type: 2.4.1
 
-  audio-type@2.4.0: {}
+  audio-type@2.4.1: {}
 
   body-parser@2.2.2:
     dependencies:
@@ -465,9 +509,9 @@ snapshots:
       http-errors: 2.0.1
       iconv-lite: 0.7.2
       on-finished: 2.4.1
-      qs: 6.15.0
+      qs: 6.15.2
       raw-body: 3.0.2
-      type-is: 2.0.1
+      type-is: 2.1.0
     transitivePeerDependencies:
       - supports-color
 
@@ -489,9 +533,11 @@ snapshots:
     dependencies:
       keypress: 0.1.0
 
-  content-disposition@1.0.1: {}
+  content-disposition@1.1.0: {}
 
   content-type@1.0.5: {}
+
+  content-type@2.0.0: {}
 
   cookie-signature@1.2.2: {}
 
@@ -517,7 +563,7 @@ snapshots:
 
   es-errors@1.3.0: {}
 
-  es-object-atoms@1.1.1:
+  es-object-atoms@1.1.2:
     dependencies:
       es-errors: 1.3.0
 
@@ -529,7 +575,7 @@ snapshots:
     dependencies:
       accepts: 2.0.0
       body-parser: 2.2.2
-      content-disposition: 1.0.1
+      content-disposition: 1.1.0
       content-type: 1.0.5
       cookie: 0.7.2
       cookie-signature: 1.2.2
@@ -547,13 +593,13 @@ snapshots:
       once: 1.4.0
       parseurl: 1.3.3
       proxy-addr: 2.0.7
-      qs: 6.15.0
+      qs: 6.15.2
       range-parser: 1.2.1
       router: 2.2.0
       send: 1.2.1
       serve-static: 2.2.1
       statuses: 2.0.2
-      type-is: 2.0.1
+      type-is: 2.1.0
       vary: 1.1.2
     transitivePeerDependencies:
       - supports-color
@@ -580,24 +626,24 @@ snapshots:
       call-bind-apply-helpers: 1.0.2
       es-define-property: 1.0.1
       es-errors: 1.3.0
-      es-object-atoms: 1.1.1
+      es-object-atoms: 1.1.2
       function-bind: 1.1.2
       get-proto: 1.0.1
       gopd: 1.2.0
       has-symbols: 1.1.0
-      hasown: 2.0.2
+      hasown: 2.0.4
       math-intrinsics: 1.1.0
 
   get-proto@1.0.1:
     dependencies:
       dunder-proto: 1.0.1
-      es-object-atoms: 1.1.1
+      es-object-atoms: 1.1.2
 
   gopd@1.2.0: {}
 
   has-symbols@1.1.0: {}
 
-  hasown@2.0.2:
+  hasown@2.0.4:
     dependencies:
       function-bind: 1.1.2
 
@@ -681,11 +727,11 @@ snapshots:
 
   qoa-format@1.0.1:
     dependencies:
-      '@thi.ng/bitstream': 2.4.45
+      '@thi.ng/bitstream': 2.4.53
 
-  qs@6.15.0:
+  qs@6.15.2:
     dependencies:
-      side-channel: 1.1.0
+      side-channel: 1.1.1
 
   range-parser@1.2.1: {}
 
@@ -735,7 +781,7 @@ snapshots:
 
   setprototypeof@1.2.0: {}
 
-  side-channel-list@1.0.0:
+  side-channel-list@1.0.1:
     dependencies:
       es-errors: 1.3.0
       object-inspect: 1.13.4
@@ -755,11 +801,11 @@ snapshots:
       object-inspect: 1.13.4
       side-channel-map: 1.0.1
 
-  side-channel@1.1.0:
+  side-channel@1.1.1:
     dependencies:
       es-errors: 1.3.0
       object-inspect: 1.13.4
-      side-channel-list: 1.0.0
+      side-channel-list: 1.0.1
       side-channel-map: 1.0.1
       side-channel-weakmap: 1.0.2
 
@@ -769,9 +815,9 @@ snapshots:
 
   toidentifier@1.0.1: {}
 
-  type-is@2.0.1:
+  type-is@2.1.0:
     dependencies:
-      content-type: 1.0.5
+      content-type: 2.0.0
       media-typer: 1.1.0
       mime-types: 3.0.2
 

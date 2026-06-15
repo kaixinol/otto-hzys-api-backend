@@ -2,7 +2,7 @@
 
 `otto-hzys` 的纯后端 API 包装层。
 
-上游源码来源固定为 `submod/`，目标上游仓库是  https://github.com/hua-zhi-wan/otto-hzys 。
+上游源码来源固定为 `submod/`，目标上游仓库是 <https://github.com/hua-zhi-wan/otto-hzys> 。
 
 测试 Vercel 页面：https://otto-hzys-api-backend.vercel.app/
 
@@ -75,9 +75,9 @@ git submodule update --init --recursive
 
 仓库额外提供了一套单独的 Vercel 版本：
 
-- 入口是 [`api/text-to-wav.js`](/mnt/data/Project/otto-hzys-api-backend/api/text-to-wav.js)
-- 健康检查是 [`api/health.js`](/mnt/data/Project/otto-hzys-api-backend/api/health.js)
-- 根路径前端是 [`index.html`](/mnt/data/Project/otto-hzys-api-backend/index.html)
+- 入口是 [`api/text-to-wav.js`](api/text-to-wav.js)
+- 健康检查是 [`api/health.js`](api/health.js)
+- 根路径前端是 [`index.html`](index.html)
 - 不依赖本地 `submod/public/static`
 - 不依赖系统 `ffmpeg`
 - 改为从 `https://otto-hzys.huazhiwan.top/static` 拉取远程资源
