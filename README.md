@@ -2,7 +2,7 @@
 
 `otto-hzys` 的纯后端 API 包装层。
 
-上游源码来源固定为 `submod/`，目标上游仓库是 <https://github.com/hua-zhi-wan/otto-hzys> 。
+上游源码来源固定为 `submod/`，目标上游仓库是 <https://github.com/hua-zhi-wan/otto-hzys>。
 
 测试 Vercel 页面：https://otto-hzys-api-backend.vercel.app/
 
@@ -37,7 +37,8 @@ Authorization: Bearer <your-key>
 
 - `authEnabled`
 - `maxTextLength`
-- `assetBaseUrl`（Vercel 版本）
+- `remoteMode` — 是否启用远程模式
+- `assetBaseUrl`（仅当 `remoteMode` 为 `true` 时返回）
 
 ## Setup
 
@@ -45,6 +46,18 @@ Authorization: Bearer <your-key>
 git submodule update --init --recursive
 pnpm install
 pnpm start
+```
+
+默认使用本地 `submod/public/static` 资源，需要初始化 submodule。
+
+如需使用远程资源，设置 `OTTO_HZYS_ASSET_BASE_URL`：
+
+```bash
+# 使用默认远程地址（Vercel 部署的 static 目录）
+OTTO_HZYS_ASSET_BASE_URL= pnpm start
+
+# 或指定自定义远程地址
+OTTO_HZYS_ASSET_BASE_URL=https://otto-hzys.huazhiwan.top/static pnpm start
 ```
 
 运行测试：
@@ -55,36 +68,23 @@ pnpm test
 
 ## Static Assets
 
-后端只从 `submod/public/static` 读取静态素材。
+**默认**从本地 `submod/public/static` 读取静态素材，需要初始化 submodule。
 
-如果 `submod` 尚未初始化，服务会启动失败，并提示先执行：
+**远程模式**：设置 `OTTO_HZYS_ASSET_BASE_URL` 后，服务从远程 URL 拉取静态资源（JSON 和音频文件），无需初始化 submodule。
 
-```bash
-git submodule update --init --recursive
-```
+本地版本默认远程地址为 `https://otto-hzys-api-backend.vercel.app/submod/public/static`，Vercel 版本无默认远程地址。
 
 ## ffmpeg
 
-音频拼接依赖系统中的 `ffmpeg` 可执行文件。
+音频拼接依赖系统中的 `ffmpeg` 可执行文件（**仅在本地模式下需要**）。
 
 - 启动时会检测 `ffmpeg`
 - 缺失时会在日志中打印明确错误
 - `/api/text-to-wav` 会返回 `ffmpeg unavailable`
 
-## Vercel Version
+在远程模式下，使用纯 JavaScript 解码（`node-wav` + `mpg123-decoder`），**不需要** `ffmpeg`。
 
-仓库额外提供了一套单独的 Vercel 版本：
-
-- 入口是 [`api/text-to-wav.js`](api/text-to-wav.js)
-- 健康检查是 [`api/health.js`](api/health.js)
-- 根路径前端是 [`index.html`](index.html)
-- 不依赖本地 `submod/public/static`
-- 不依赖系统 `ffmpeg`
-- 改为从 `https://otto-hzys.huazhiwan.top/static` 拉取远程资源
-- `wav` 使用 `node-wav`
-- `mp3` 使用 `mpg123-decoder`
-
-可选环境变量：
+## 环境变量
 
 ```bash
 OTTO_HZYS_ASSET_BASE_URL=https://otto-hzys.huazhiwan.top/static
@@ -94,13 +94,24 @@ OTTO_HZYS_MAX_TEXT_LENGTH=1000
 
 说明：
 
-- 未配置 `OTTO_HZYS_ASSET_BASE_URL` 时，会默认使用 `https://otto-hzys.huazhiwan.top/static`
-- 如果默认资源地址或自定义资源地址不可访问，`/health` 会返回 `503`，音频生成也会失败
-- 未配置 `OTTO_HZYS_API_KEY` 时，不启用认证
-- 配置 `OTTO_HZYS_API_KEY` 后，`POST /api/text-to-wav` 必须携带 `Authorization: Bearer <key>`
-- `OTTO_HZYS_MAX_TEXT_LENGTH` 控制文本最大长度，默认 `1000`
-- Vercel 根路径 `/` 现在提供一个简易前端，可直接输入文本、勾选参数并在页面内播放生成的 `wav`
-- 前端选项中的 `useNonDdbPinyin` 对应展示文案为“使用非电棍拼音”
+- `OTTO_HZYS_ASSET_BASE_URL` — 设置后启用远程模式。本地版本未设置时使用默认值 `https://otto-hzys-api-backend.vercel.app/submod/public/static`，Vercel 版本未设置时使用本地 submodule
+- `OTTO_HZYS_API_KEY` — 未配置时不启用认证；配置后请求必须携带 `Authorization: Bearer <key>`
+- `OTTO_HZYS_MAX_TEXT_LENGTH` — 文本最大长度，默认 `1000`
+
+## Vercel Version
+
+仓库额外提供了一套单独的 Vercel 版本：
+
+- 入口是 [`api/text-to-wav.js`](api/text-to-wav.js)
+- 健康检查是 [`api/health.js`](api/health.js)
+- 根路径前端是 [`index.html`](index.html)
+- **默认**使用本地 `submod/public/static`（需要初始化 submodule）
+- 设置 `OTTO_HZYS_ASSET_BASE_URL` 可切换为远程模式，使用 `node-wav` + `mpg123-decoder` 纯 JS 解码
+- 与本地版本共享 [`lib/remote-audio.js`](lib/remote-audio.js) 中的远程音频处理逻辑
+
+Vercel 根路径 `/` 提供一个简易前端，可直接输入文本、勾选参数并在页面内播放生成的 `wav`。
+
+前端选项中的 `useNonDdbPinyin` 对应展示文案为"使用非电棍拼音"。
 
 Vercel 面板可直接使用：
 

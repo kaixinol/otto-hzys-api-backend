@@ -5,6 +5,7 @@ const { spawn } = require('child_process');
 const { buildStaticDataContext, textToAudioSequence } = require('./lib/text-to-audio-sequence');
 const { getRuntimeConfig } = require('./lib/runtime-config');
 const { validateApiKeyHeader } = require('./lib/api-security');
+const remoteAudio = require('./lib/remote-audio');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -19,6 +20,8 @@ let ffmpegStatusMessage = 'ffmpeg has not been checked yet.';
 let staticRoot;
 let tokensRoot;
 let ysddTokensRoot;
+
+const runtimeConfig = getRuntimeConfig();
 
 async function pathExists(targetPath) {
   try {
@@ -35,61 +38,82 @@ async function resolveStaticRoot() {
     return candidate;
   }
 
-  throw new Error('Could not locate static assets in submod/public/static. Run `git submodule update --init --recursive` first.');
+  throw new Error('Could not locate static assets in submod/public/static. Run `git submodule update --init --recursive` first, or set OTTO_HZYS_ASSET_BASE_URL to use remote assets.');
+}
+
+async function loadLocalStaticData() {
+  staticRoot = await resolveStaticRoot();
+  tokensRoot = path.join(staticRoot, 'tokens');
+  ysddTokensRoot = path.join(staticRoot, 'ysddTokens');
+
+  // Load tokens.json
+  const tokensPath = path.join(staticRoot, 'tokens.json');
+  const tokensContent = await fs.readFile(tokensPath, 'utf8');
+  const tokensData = JSON.parse(tokensContent);
+
+  // Load ysdd.json
+  const ysddPath = path.join(staticRoot, 'ysdd.json');
+  const ysddContent = await fs.readFile(ysddPath, 'utf8');
+  const ysddData = JSON.parse(ysddContent);
+
+  // Load chinglish.json
+  const chinglishPath = path.join(staticRoot, 'chinglish.json');
+  const chinglishContent = await fs.readFile(chinglishPath, 'utf8');
+  const chinglishRaw = JSON.parse(chinglishContent);
+
+  ({
+    tokenSet,
+    ysddSource,
+    ysddDict,
+    ysddLastWordLengthIndex,
+    tonedChinglish
+  } = buildStaticDataContext(tokensData, ysddData, chinglishRaw));
+
+  // Build subdirFileMap for non-ddb pinyin
+  subdirFileMap = new Map();
+  const subdirs = remoteAudio.NON_DDB_SUBDIRS;
+
+  for (const subdir of subdirs) {
+    try {
+      const subdirPath = path.join(tokensRoot, subdir);
+      const files = await fs.readdir(subdirPath);
+      const wavFiles = files.filter(file => file.endsWith('.wav'));
+      subdirFileMap.set(subdir, wavFiles);
+    } catch (err) {
+      // Subdirectory might not exist, that's fine
+      subdirFileMap.set(subdir, []);
+    }
+  }
+
+  console.log(`Static data loaded successfully from ${staticRoot}`);
 }
 
 async function loadStaticData() {
-  try {
-    staticRoot = await resolveStaticRoot();
-    tokensRoot = path.join(staticRoot, 'tokens');
-    ysddTokensRoot = path.join(staticRoot, 'ysddTokens');
-
-    // Load tokens.json
-    const tokensPath = path.join(staticRoot, 'tokens.json');
-    const tokensContent = await fs.readFile(tokensPath, 'utf8');
-    const tokensData = JSON.parse(tokensContent);
-
-    // Load ysdd.json  
-    const ysddPath = path.join(staticRoot, 'ysdd.json');
-    const ysddContent = await fs.readFile(ysddPath, 'utf8');
-    const ysddData = JSON.parse(ysddContent);
-
-    // Load chinglish.json
-    const chinglishPath = path.join(staticRoot, 'chinglish.json');
-    const chinglishContent = await fs.readFile(chinglishPath, 'utf8');
-    const chinglishRaw = JSON.parse(chinglishContent);
+  if (runtimeConfig.remoteMode) {
+    console.log(`Remote mode enabled. Loading static data from ${runtimeConfig.assetBaseUrl}`);
+    const staticData = await remoteAudio.loadStaticData(runtimeConfig.assetBaseUrl);
     ({
       tokenSet,
       ysddSource,
       ysddDict,
       ysddLastWordLengthIndex,
       tonedChinglish
-    } = buildStaticDataContext(tokensData, ysddData, chinglishRaw));
-
-    // Build subdirFileMap for non-ddb pinyin
-    subdirFileMap = new Map();
-    const subdirs = ['amns', 'ddj', 'dxl', 'hg1', 'hg2', 'hjm', 'hm', 'mb', 'mbo', 'nyyszgr', 'pbb', 'uzi', 'yzd', 'yy'];
-    
-    for (const subdir of subdirs) {
-      try {
-        const subdirPath = path.join(tokensRoot, subdir);
-        const files = await fs.readdir(subdirPath);
-        const wavFiles = files.filter(file => file.endsWith('.wav'));
-        subdirFileMap.set(subdir, wavFiles);
-      } catch (err) {
-        // Subdirectory might not exist, that's fine
-        subdirFileMap.set(subdir, []);
-      }
-    }
-
-    console.log(`Static data loaded successfully from ${staticRoot}`);
-  } catch (error) {
-    console.error('Failed to load static data:', error);
-    throw error;
+    } = staticData);
+    console.log('Remote static data loaded successfully');
+    return;
   }
+
+  await loadLocalStaticData();
 }
 
 async function checkFfmpegAvailability() {
+  if (runtimeConfig.remoteMode) {
+    ffmpegAvailable = true;
+    ffmpegStatusMessage = 'not required in remote mode';
+    console.log('Remote mode: ffmpeg check skipped (using pure JS audio decoding)');
+    return;
+  }
+
   try {
     const versionOutput = await new Promise((resolve, reject) => {
       const ffmpeg = spawn('ffmpeg', ['-version']);
@@ -120,7 +144,7 @@ async function checkFfmpegAvailability() {
   }
 }
 
-// Helper function to get audio file path based on useNonDdbPinyin setting
+// Helper function to get audio file path based on useNonDdbPinyin setting (local mode only)
 function getAudioFilePath(token, useNonDdbPinyin = false) {
   // If it's an original sound track (<filename>), always use ysddTokens directory
   if (/<.+>/.test(token)) {
@@ -130,16 +154,16 @@ function getAudioFilePath(token, useNonDdbPinyin = false) {
 
   // For regular tokens
   const baseTokensPath = tokensRoot;
-  
+
   // If useNonDdbPinyin is false, use direct tokens directory
   if (!useNonDdbPinyin) {
     return path.join(baseTokensPath, `${token}.wav`);
   }
 
   // If useNonDdbPinyin is true, implement random selection logic
-  const subdirs = ['amns', 'ddj', 'dxl', 'hg1', 'hg2', 'hjm', 'hm', 'mb', 'mbo', 'nyyszgr', 'pbb', 'uzi', 'yzd', 'yy'];
+  const subdirs = remoteAudio.NON_DDB_SUBDIRS;
   const availableSubdirs = [];
-  
+
   // Check which subdirectories contain this token
   for (const subdir of subdirs) {
     const files = subdirFileMap.get(subdir) || [];
@@ -148,22 +172,22 @@ function getAudioFilePath(token, useNonDdbPinyin = false) {
       availableSubdirs.push({ subdir, files: matchingFiles });
     }
   }
-  
+
   // If no subdirectories have this token, fall back to direct tokens directory
   if (availableSubdirs.length === 0) {
     return path.join(baseTokensPath, `${token}.wav`);
   }
-  
+
   // Randomly choose between subdirectories and direct tokens directory
   // Total options = available subdirectories + 1 (for direct tokens)
   const totalOptions = availableSubdirs.length + 1;
   const randomChoice = Math.floor(Math.random() * totalOptions);
-  
+
   // If random choice is the last option, use direct tokens directory
   if (randomChoice === availableSubdirs.length) {
     return path.join(baseTokensPath, `${token}.wav`);
   }
-  
+
   // Otherwise, use the selected subdirectory
   const selectedOption = availableSubdirs[randomChoice];
   const randomFile = selectedOption.files[Math.floor(Math.random() * selectedOption.files.length)];
@@ -231,13 +255,13 @@ app.post('/api/text-to-wav', async (req, res) => {
       return res.status(authResult.statusCode).json(authResult.body);
     }
 
-    const { 
-      text, 
-      isYsdd = true, 
+    const {
+      text,
+      isYsdd = true,
       useNonDdbPinyin = true,
       isSliced = false
     } = req.body;
-    
+
     if (!text || typeof text !== 'string') {
       return res.status(400).json({ error: 'Invalid text parameter' });
     }
@@ -254,7 +278,7 @@ app.post('/api/text-to-wav', async (req, res) => {
       });
     }
 
-    // Convert text to audio sequence (useNonDdbPinyin doesn't affect sequence generation)
+    // Convert text to audio sequence
     const audioSequence = textToAudioSequence(text, {
       tokenSet,
       ysddSource,
@@ -262,33 +286,42 @@ app.post('/api/text-to-wav', async (req, res) => {
       ysddLastWordLengthIndex,
       tonedChinglish
     }, { isYsdd, isSliced });
-    
+
     if (audioSequence.length === 0) {
       return res.status(400).json({ error: 'No valid audio sequence generated' });
     }
 
-    // Resolve all source audio files and let ffmpeg produce a valid single WAV.
-    const audioFilePaths = [];
-    for (const item of audioSequence) {
-      const filePath = getAudioFilePath(item, useNonDdbPinyin);
-      audioFilePaths.push(await resolveAudioFilePath(filePath));
-    }
+    let resultBuffer;
 
-    if (audioFilePaths.length === 0) {
-      return res.status(400).json({ error: 'No audio files found' });
-    }
+    if (runtimeConfig.remoteMode) {
+      // Remote mode: fetch audio via HTTP and mix with pure JS
+      resultBuffer = await remoteAudio.renderSequenceToWavBuffer(
+        audioSequence, useNonDdbPinyin, runtimeConfig.assetBaseUrl
+      );
+    } else {
+      // Local mode: resolve local files and concatenate with ffmpeg
+      const audioFilePaths = [];
+      for (const item of audioSequence) {
+        const filePath = getAudioFilePath(item, useNonDdbPinyin);
+        audioFilePaths.push(await resolveAudioFilePath(filePath));
+      }
 
-    const resultBuffer = await concatAudioFilesToWav(audioFilePaths);
+      if (audioFilePaths.length === 0) {
+        return res.status(400).json({ error: 'No audio files found' });
+      }
+
+      resultBuffer = await concatAudioFilesToWav(audioFilePaths);
+    }
 
     // Set response headers
     res.setHeader('Content-Type', 'audio/wav');
     res.setHeader('Content-Disposition', `attachment; filename="otto-${Date.now()}.wav"`);
-    
+
     res.send(resultBuffer);
 
   } catch (error) {
     console.error('Text-to-WAV error:', error);
-    const isFfmpegError = /ffmpeg/i.test(error.message || '');
+    const isFfmpegError = !runtimeConfig.remoteMode && /ffmpeg/i.test(error.message || '');
     res.status(isFfmpegError ? 503 : 500).json({
       error: isFfmpegError ? 'ffmpeg unavailable' : 'Internal server error',
       message: isFfmpegError ? error.message : 'Internal server error'
@@ -298,20 +331,25 @@ app.post('/api/text-to-wav', async (req, res) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  const { authEnabled, maxTextLength } = getRuntimeConfig();
-  res.json({
+  const { authEnabled, maxTextLength, assetBaseUrl, remoteMode } = getRuntimeConfig();
+  const response = {
     status: 'ok',
     message: 'Backend server is running',
     authEnabled,
-    maxTextLength
-  });
+    maxTextLength,
+    remoteMode
+  };
+  if (remoteMode) {
+    response.assetBaseUrl = assetBaseUrl;
+  }
+  res.json(response);
 });
 
 // Catch-all route for non-API requests - return JSON error instead of HTML
 app.use((req, res) => {
-  res.status(404).json({ 
-    error: 'Not Found', 
-    message: 'This backend server only provides API endpoints. Valid endpoints: POST /api/text-to-wav, GET /health' 
+  res.status(404).json({
+    error: 'Not Found',
+    message: 'This backend server only provides API endpoints. Valid endpoints: POST /api/text-to-wav, GET /health'
   });
 });
 
