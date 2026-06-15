@@ -1,7 +1,6 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs').promises;
-const { spawn } = require('child_process');
 const { buildStaticDataContext, textToAudioSequence } = require('./lib/text-to-audio-sequence');
 const { getRuntimeConfig } = require('./lib/runtime-config');
 const { validateApiKeyHeader } = require('./lib/api-security');
@@ -15,13 +14,15 @@ app.use(express.json({ limit: '10mb' }));
 // Load static data files
 let subdirFileMap;
 let tokenSet, ysddSource, ysddDict, tonedChinglish, ysddLastWordLengthIndex;
-let ffmpegAvailable = false;
-let ffmpegStatusMessage = 'ffmpeg has not been checked yet.';
 let staticRoot;
 let tokensRoot;
 let ysddTokensRoot;
 
+// In-memory cache for local audio file buffers. Enabled by default via OTTO_HZYS_CACHE_AUDIO.
+const localAudioBufferCache = new Map();
+
 const runtimeConfig = getRuntimeConfig();
+const { cacheAudio } = runtimeConfig;
 
 async function pathExists(targetPath) {
   try {
@@ -108,40 +109,11 @@ async function loadStaticData() {
 
 async function checkFfmpegAvailability() {
   if (runtimeConfig.remoteMode) {
-    ffmpegAvailable = true;
-    ffmpegStatusMessage = 'not required in remote mode';
     console.log('Remote mode: ffmpeg check skipped (using pure JS audio decoding)');
     return;
   }
 
-  try {
-    const versionOutput = await new Promise((resolve, reject) => {
-      const ffmpeg = spawn('ffmpeg', ['-version']);
-      const stdoutChunks = [];
-      const stderrChunks = [];
-
-      ffmpeg.stdout.on('data', chunk => stdoutChunks.push(chunk));
-      ffmpeg.stderr.on('data', chunk => stderrChunks.push(chunk));
-      ffmpeg.on('error', reject);
-      ffmpeg.on('close', code => {
-        if (code === 0) {
-          resolve(Buffer.concat(stdoutChunks).toString('utf8'));
-          return;
-        }
-
-        reject(new Error(Buffer.concat(stderrChunks).toString('utf8') || `ffmpeg exited with code ${code}`));
-      });
-    });
-
-    const firstLine = versionOutput.split('\n')[0]?.trim() || 'ffmpeg is available';
-    ffmpegAvailable = true;
-    ffmpegStatusMessage = firstLine;
-    console.log(`ffmpeg check passed: ${firstLine}`);
-  } catch (error) {
-    ffmpegAvailable = false;
-    ffmpegStatusMessage = `ffmpeg is required for audio generation but was not found or failed to start: ${error.message}`;
-    console.error(`ffmpeg check failed: ${ffmpegStatusMessage}`);
-  }
+  console.log('Local mode: using pure JS audio decoding (ffmpeg not required)');
 }
 
 // Helper function to get audio file path based on useNonDdbPinyin setting (local mode only)
@@ -204,47 +176,29 @@ async function resolveAudioFilePath(filePath) {
   }
 }
 
-async function concatAudioFilesToWav(filePaths) {
-  const ffmpegArgs = [
-    '-hide_banner',
-    '-loglevel', 'error'
-  ];
-
-  for (const filePath of filePaths) {
-    ffmpegArgs.push('-i', path.resolve(filePath));
+async function readAudioFile(filePath) {
+  if (!cacheAudio) {
+    return fs.readFile(filePath);
   }
 
-  const filterInputs = filePaths.map((_, index) => `[${index}:a]`).join('');
-  ffmpegArgs.push(
-    '-filter_complex',
-    `${filterInputs}concat=n=${filePaths.length}:v=0:a=1[aout]`,
-    '-map', '[aout]',
-    '-ac', '1',
-    '-ar', '44100',
-    '-f', 'wav',
-    'pipe:1'
+  if (localAudioBufferCache.has(filePath)) {
+    return localAudioBufferCache.get(filePath);
+  }
+
+  const buffer = await fs.readFile(filePath);
+  localAudioBufferCache.set(filePath, buffer);
+  return buffer;
+}
+
+async function concatAudioFilesToWav(filePaths) {
+  const audioFiles = await Promise.all(
+    filePaths.map(async (filePath) => ({
+      buffer: await readAudioFile(filePath),
+      extension: path.extname(filePath).toLowerCase()
+    }))
   );
 
-  const outputBuffer = await new Promise((resolve, reject) => {
-    const ffmpeg = spawn('ffmpeg', ffmpegArgs);
-
-    const stdoutChunks = [];
-    const stderrChunks = [];
-
-    ffmpeg.stdout.on('data', chunk => stdoutChunks.push(chunk));
-    ffmpeg.stderr.on('data', chunk => stderrChunks.push(chunk));
-    ffmpeg.on('error', reject);
-    ffmpeg.on('close', code => {
-      if (code === 0) {
-        resolve(Buffer.concat(stdoutChunks));
-        return;
-      }
-
-      reject(new Error(`ffmpeg exited with code ${code}: ${Buffer.concat(stderrChunks).toString('utf8')}`));
-    });
-  });
-
-  return outputBuffer;
+  return remoteAudio.renderBuffersToWavBuffer(audioFiles);
 }
 
 // Main text-to-wav endpoint
@@ -271,13 +225,6 @@ app.post('/api/text-to-wav', async (req, res) => {
       return res.status(400).json({ error: `Text too long (max ${maxTextLength} characters)` });
     }
 
-    if (!ffmpegAvailable) {
-      return res.status(503).json({
-        error: 'ffmpeg unavailable',
-        message: ffmpegStatusMessage
-      });
-    }
-
     // Convert text to audio sequence
     const audioSequence = textToAudioSequence(text, {
       tokenSet,
@@ -299,7 +246,7 @@ app.post('/api/text-to-wav', async (req, res) => {
         audioSequence, useNonDdbPinyin, runtimeConfig.assetBaseUrl
       );
     } else {
-      // Local mode: resolve local files and concatenate with ffmpeg
+      // Local mode: resolve local files and concatenate with pure JS
       const audioFilePaths = [];
       for (const item of audioSequence) {
         const filePath = getAudioFilePath(item, useNonDdbPinyin);
@@ -321,10 +268,9 @@ app.post('/api/text-to-wav', async (req, res) => {
 
   } catch (error) {
     console.error('Text-to-WAV error:', error);
-    const isFfmpegError = !runtimeConfig.remoteMode && /ffmpeg/i.test(error.message || '');
-    res.status(isFfmpegError ? 503 : 500).json({
-      error: isFfmpegError ? 'ffmpeg unavailable' : 'Internal server error',
-      message: isFfmpegError ? error.message : 'Internal server error'
+    res.status(500).json({
+      error: 'Internal server error',
+      message: 'Internal server error'
     });
   }
 });

@@ -46,13 +46,13 @@ Authorization: Bearer <your-key>
 
 ```bash
 git submodule update --init --recursive
-pnpm run install:local   # 跳过 Vercel 专用的 JS 音频解码库
+pnpm install
 pnpm start
 ```
 
-本地模式默认依赖系统 `ffmpeg` 拼接音频，不需要 `node-wav`/`mpg123-decoder`。`install:local` 等同 `pnpm install --no-optional`，不会安装这两个库。
+本地模式使用纯 JavaScript 拼接音频（`node-wav` + `mpg123-decoder`）。
 
-本地也可以切到纯 JS 远程模式（不调用 ffmpeg）：
+如需使用远程资源，设置 `OTTO_HZYS_ASSET_BASE_URL`：
 
 ```bash
 # 使用默认远程地址（Vercel 部署的 static 目录）
@@ -70,7 +70,7 @@ pnpm test
 
 ### Vercel 部署
 
-Vercel 版本始终使用纯 JS 解码 + `fetch` 拉取素材，**不调用 ffmpeg**。
+Vercel 版本始终使用纯 JS 解码 + `fetch` 拉取素材。
 
 ```bash
 # 使用默认素材地址（自身 /submod/public/static）
@@ -81,9 +81,10 @@ pnpm install
 Vercel 面板配置：
 
 - Framework Preset: `Other`
-- Install Command: `pnpm install`（会安装 `node-wav` 和 `mpg123-decoder`）
+- Install Command: `pnpm install`
 - Build Command: 留空
 - Output Directory: `.`
+- 建议设置 `OTTO_HZYS_CACHE_AUDIO=false`，避免 Serverless 实例内存缓存音频文件
 
 如需切换到自定义素材地址，设置 `OTTO_HZYS_ASSET_BASE_URL`：
 
@@ -101,13 +102,29 @@ OTTO_HZYS_ASSET_BASE_URL=https://otto-hzys.huazhiwan.top/static
 
 Vercel 版本未设置时会自动根据当前请求的 host 构造 `https://<host>/submod/public/static`，支持预览部署和自定义域名。
 
-## ffmpeg
+## 音频处理
 
-- **本地模式**：音频拼接依赖系统中的 `ffmpeg` 可执行文件。
-- **本地远程模式**：设置 `OTTO_HZYS_ASSET_BASE_URL` 后，使用纯 JavaScript 解码（`node-wav` + `mpg123-decoder`）+ `fetch` 拉取素材，**不调用 ffmpeg**。
-- **Vercel 模式**：始终使用纯 JavaScript 解码 + `fetch` 拉取素材，**不调用 ffmpeg**。
+本地和 Vercel 均使用纯 JavaScript 处理音频：
 
-本地启动时会检测 `ffmpeg`；缺失时 `/api/text-to-wav` 返回 `ffmpeg unavailable`。
+- WAV 文件使用 `node-wav` 编解码
+- MP3 文件使用 `mpg123-decoder` 解码
+- 多声道、不同采样率的素材会统一转码为 mono / 44100Hz / 16bit PCM
+
+## 缓存
+
+本地模式默认开启音频文件内存缓存：第一次从磁盘读取的音频文件会被保留在内存中，后续请求直接复用，避免重复读取磁盘。
+
+Vercel 建议关闭音频缓存，因为 Serverless 实例内存有限且静态素材已由 Vercel Edge CDN 缓存。
+
+通过环境变量控制：
+
+```bash
+# 本地默认开启
+OTTO_HZYS_CACHE_AUDIO=true
+
+# Vercel 建议关闭
+OTTO_HZYS_CACHE_AUDIO=false
+```
 
 ## 环境变量
 
@@ -115,6 +132,7 @@ Vercel 版本未设置时会自动根据当前请求的 host 构造 `https://<ho
 OTTO_HZYS_ASSET_BASE_URL=https://otto-hzys.huazhiwan.top/static
 OTTO_HZYS_API_KEY=your-secret-key
 OTTO_HZYS_MAX_TEXT_LENGTH=1000
+OTTO_HZYS_CACHE_AUDIO=true
 ```
 
 说明：
@@ -122,6 +140,7 @@ OTTO_HZYS_MAX_TEXT_LENGTH=1000
 - `OTTO_HZYS_ASSET_BASE_URL` — 设置后启用远程模式。本地版本未设置时默认使用 `https://otto-hzys-api-backend.vercel.app/submod/public/static`；Vercel 版本未设置时自动根据当前请求的 host 构造 `https://<host>/submod/public/static`
 - `OTTO_HZYS_API_KEY` — 未配置时不启用认证；配置后请求必须携带 `Authorization: Bearer <key>`
 - `OTTO_HZYS_MAX_TEXT_LENGTH` — 文本最大长度，默认 `1000`
+- `OTTO_HZYS_CACHE_AUDIO` — 音频文件内存缓存，本地默认 `true`，Vercel 建议 `false`
 
 ## Vercel Version
 
@@ -130,7 +149,7 @@ OTTO_HZYS_MAX_TEXT_LENGTH=1000
 - 入口是 [`api/text-to-wav.js`](api/text-to-wav.js)
 - 健康检查是 [`api/health.js`](api/health.js)
 - 根路径前端是 [`index.html`](index.html)
-- 始终使用纯 JS 解码，**不调用 ffmpeg**
+- 始终使用纯 JS 解码
 - 素材默认从自身 `/submod/public/static` 拉取，自动适配当前请求域名（支持预览部署和自定义域名），也可通过 `OTTO_HZYS_ASSET_BASE_URL` 切换到自定义地址
 - 与本地版本共享 [`lib/remote-audio.js`](lib/remote-audio.js) 中的纯 JS 音频处理逻辑
 
